@@ -1,20 +1,16 @@
-import { Controller, Get, Query, Req, Headers, Param, Post, Body } from '@nestjs/common';
+import { Controller, Get, Query, Req, Headers, Param, Post, Body, HttpException, HttpStatus, ForbiddenException, UseFilters } from '@nestjs/common';
 import { CreatePostDto } from './post.dto';
+import { DemoService } from './providers/demo/demo.service';
+import { DemoFilter } from '../core/filters/demo.filter';
 
 @Controller('posts')
 export class PostsController {
-  @Get()
-  index(@Headers('authorization') headers) {
-    // tslint:disable-next-line:no-console
-    console.log(
-      headers,
-    );
 
-    return [
-      {
-        title: 'hello',
-      },
-    ];
+  constructor(private readonly demoService: DemoService) {}
+
+  @Get()
+  index() {
+    return this.demoService.findAll();
   }
 
   @Get(':id')
@@ -25,8 +21,10 @@ export class PostsController {
   }
 
   @Post()
+  @UseFilters(DemoFilter)
   store(@Body() post: CreatePostDto) {
-    // tslint:disable-next-line:no-console
-    console.log(post.title);
+    // throw new HttpException('没有权限！', HttpStatus.FORBIDDEN);
+    // this.demoService.create(post);
+    throw new ForbiddenException('没有权限！');
   }
 }
