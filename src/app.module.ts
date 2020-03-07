@@ -3,11 +3,24 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PostsModule } from './posts/posts.module';
 import { DemoMiddleware } from './core/middlewares/demo.middleware';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { DemoRolesGuard } from './core/guards/demo-roles.guard';
+import { LogginInterceptor } from './core/interceptors/loggin.interceptor';
 
 @Module({
   imports: [PostsModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: DemoRolesGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LogginInterceptor,
+    },
+  ],
 })
 export class AppModule implements NestMiddleware {
   configure(consumer: MiddlewareConsumer) {
@@ -16,6 +29,7 @@ export class AppModule implements NestMiddleware {
       .forRoutes('posts');
   }
 
+  // tslint:disable-next-line:no-empty
   use(req: any, res: any, next: () => void): any {
   }
 }
